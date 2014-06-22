@@ -3,15 +3,6 @@ package recfun
 import scala.annotation.tailrec
 
 object Main {
-  def main(args: Array[String]) {
-    println("Pascal's Triangle")
-    for (row <- 0 to 10) {
-      for (col <- 0 to row)
-        print(pascal(col, row) + " ")
-      println()
-    }
-  }
-
   /**
    * Exercise 1
    */
@@ -28,11 +19,8 @@ object Main {
       r == 0
     }
 
-    if (isFirstRow) return 1
-    if (isFirstInRow) return 1
-    if (isLastInRow) return 1
-
-    pascal(c - 1, r - 1) + pascal(c, r - 1)
+    if (isFirstRow || isFirstInRow || isLastInRow) 1
+    else pascal(c - 1, r - 1) + pascal(c, r - 1)
   }
 
   /**
@@ -43,52 +31,59 @@ object Main {
     @tailrec
     def balance(chars: List[Char], nrOfOpenParenthesis: Int): Boolean = {
       if (nrOfOpenParenthesis < 0) {
-        return false
-      }
-
-      if (chars.isEmpty) {
-        if (nrOfOpenParenthesis == 0) return true else return false
-      }
-
-      if (chars.head == ')') {
-        balance(chars.tail, nrOfOpenParenthesis - 1)
-      }
-      else if (chars.head == '(') {
-        balance(chars.tail, nrOfOpenParenthesis + 1)
-      }
-      else {
-        balance(chars.tail, nrOfOpenParenthesis)
+        false
+      } else {
+        if (chars.isEmpty) {
+          if (nrOfOpenParenthesis == 0) true else false
+        } else {
+          if (chars.head == ')') {
+            balance(chars.tail, nrOfOpenParenthesis - 1)
+          }
+          else if (chars.head == '(') {
+            balance(chars.tail, nrOfOpenParenthesis + 1)
+          }
+          else {
+            balance(chars.tail, nrOfOpenParenthesis)
+          }
+        }
       }
     }
 
     balance(chars, 0)
   }
 
+
+
   /**
    * Exercise 3
    */
   def countChange(money: Int, coins: List[Int]): Int = {
-    var nrOfPartitions = 0
 
-    def incNumberOfPartitions() = {
-      nrOfPartitions = nrOfPartitions + 1
-    }
+    if (coins.isEmpty) {
+      0
+    } else {
+      def partition(n: Int, max: Int, coins: List[Int]): Int = {
 
-    def partition(n: Int, max: Int, coins: List[Int]) {
+        def headOfCoins: Int = {
+          if (coins.nonEmpty) coins.head else 0
+        }
 
-      if (n == 0) {
-        incNumberOfPartitions()
-        return
+        def tailOfCoins: List[Int] = {
+          if (coins.nonEmpty) coins.tail else List()
+        }
+
+        if (max == 0)
+          0
+        else if (n == 0)
+          1
+        else if (n < 0)
+          0
+        else partition(n, headOfCoins, tailOfCoins) + partition(n - max, max, coins)
+
       }
 
-      if (coins.nonEmpty)
-        partition(n, coins.head, coins.tail)
-      if (max <= n)
-        partition(n-max, max, coins)
+      val coinsList = coins.filter(coin => coin <= money).sorted(Ordering[Int].reverse)
+      partition(money, coinsList.head, coinsList.tail)
     }
-
-    val coinsList = coins.filter(coin => coin <= money).sorted(Ordering[Int].reverse)
-    partition(money, coinsList.head, coinsList.tail)
-    nrOfPartitions
   }
 }
