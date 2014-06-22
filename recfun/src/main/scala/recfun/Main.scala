@@ -34,7 +34,7 @@ object Main {
         false
       } else {
         if (chars.isEmpty) {
-          if (nrOfOpenParenthesis == 0) true else false
+          nrOfOpenParenthesis == 0
         } else {
           if (chars.head == ')') {
             balance(chars.tail, nrOfOpenParenthesis - 1)
