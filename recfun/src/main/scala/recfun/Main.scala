@@ -67,5 +67,28 @@ object Main {
   /**
    * Exercise 3
    */
-  def countChange(money: Int, coins: List[Int]): Int = ???
+  def countChange(money: Int, coins: List[Int]): Int = {
+    var nrOfPartitions = 0
+
+    def incNumberOfPartitions() = {
+      nrOfPartitions = nrOfPartitions + 1
+    }
+
+    def partition(n: Int, max: Int, coins: List[Int]) {
+
+      if (n == 0) {
+        incNumberOfPartitions()
+        return
+      }
+
+      if (coins.nonEmpty)
+        partition(n, coins.head, coins.tail)
+      if (max <= n)
+        partition(n-max, max, coins)
+    }
+
+    val coinsList = coins.filter(coin => coin <= money).sorted(Ordering[Int].reverse)
+    partition(money, coinsList.head, coinsList.tail)
+    nrOfPartitions
+  }
 }
