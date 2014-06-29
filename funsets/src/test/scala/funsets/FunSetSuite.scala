@@ -43,6 +43,8 @@ class FunSetSuite extends FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s1000 = singletonSet(1000)
+    val sNegative1000 = singletonSet(-1000)
   }
 
   /**
@@ -116,6 +118,56 @@ class FunSetSuite extends FunSuite {
       assert(!contains(s, 1), "Filter 1")
       assert(!contains(s, 2), "Filter 2")
       assert(contains(s, 3), "Filter 3")
+    }
+  }
+
+  test("forall positive numbers") {
+    new TestSets {
+      val s = union(s1, union(s2,s3))
+      assert(forall(s, x => x > 0), "forall positive")
+    }
+  }
+
+  test("forall not all numbers bigger than 1") {
+    new TestSets {
+      val s = union(s2, union(s2,s1))
+      assert(!forall(s, x => x > 1), "forall greater than 1")
+    }
+  }
+
+  test("forall upper limit") {
+    new TestSets {
+      assert(forall(s1000, x => x > 1), "forall empty limit")
+    }
+  }
+
+  test("forall lower limit") {
+    new TestSets {
+      assert(forall(sNegative1000, x => x < -1), "forall empty limit")
+    }
+  }
+
+  test("forall for empty set") {
+    new TestSets {
+      assert(forall(intersect(s1,s2), x => x > 1), "forall empty set")
+    }
+  }
+
+  test("exists for empty set") {
+    new TestSets {
+      assert(!exists(intersect(s1,s2), x => x > 1), "exists empty set")
+    }
+  }
+
+  test("exists at least a number greater than 1") {
+    new TestSets {
+      assert(exists(union(s1,s2), x => x > 1), "exists greater 1")
+    }
+  }
+
+  test("map multiplying by 3") {
+    new TestSets {
+      assert(contains(map(s3, x => x * 3), 9), "map multiplying by 3 set s3")
     }
   }
 }
