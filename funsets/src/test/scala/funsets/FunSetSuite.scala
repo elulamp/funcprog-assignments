@@ -14,40 +14,6 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class FunSetSuite extends FunSuite {
 
-
-  /**
-   * Link to the scaladoc - very clear and detailed tutorial of FunSuite
-   *
-   * http://doc.scalatest.org/1.9.1/index.html#org.scalatest.FunSuite
-   *
-   * Operators
-   *  - test
-   *  - ignore
-   *  - pending
-   */
-
-  /**
-   * Tests are written using the "test" operator and the "assert" method.
-   */
-  test("string take") {
-    val message = "hello, world"
-    assert(message.take(5) == "hello")
-  }
-
-  /**
-   * For ScalaTest tests, there exists a special equality operator "===" that
-   * can be used inside "assert". If the assertion fails, the two values will
-   * be printed in the error message. Otherwise, when using "==", the test
-   * error message will only say "assertion failed", without showing the values.
-   *
-   * Try it out! Change the values so that the assertion fails, and look at the
-   * error message.
-   */
-  test("adding ints") {
-    assert(1 + 2 === 3)
-  }
-
-  
   import FunSets._
 
   test("contains is implemented") {
@@ -86,7 +52,7 @@ class FunSetSuite extends FunSuite {
    * Once you finish your implementation of "singletonSet", exchange the
    * function "ignore" by "test".
    */
-  ignore("singletonSet(1) contains 1") {
+  test("singletonSet(1) contains 1") {
     
     /**
      * We create a new instance of the "TestSets" trait, this gives us access
@@ -101,12 +67,55 @@ class FunSetSuite extends FunSuite {
     }
   }
 
-  ignore("union contains all elements") {
+  test("union contains set with elements from both sets") {
     new TestSets {
       val s = union(s1, s2)
       assert(contains(s, 1), "Union 1")
       assert(contains(s, 2), "Union 2")
       assert(!contains(s, 3), "Union 3")
+    }
+  }
+
+  test("intersection returns set with elements that are present in both sets") {
+    new TestSets {
+      val s = intersect(s1, s2)
+      assert(!contains(s, 1), "Intersection 1")
+      assert(!contains(s, 2), "Intersection 2")
+      assert(!contains(s, 3), "Intersection 3")
+    }
+  }
+
+  test("diff returns empty set if both sets contain same elements") {
+    new TestSets {
+      val s = diff(s1, s1)
+      assert(!contains(s, 1), "diff 1")
+      assert(!contains(s, 2), "diff 2")
+    }
+  }
+
+  test("diff returns set with elements that are not in second set") {
+    new TestSets {
+      val s = diff(s1, s2)
+      assert(contains(s, 1), "diff 1")
+      assert(!contains(s, 2), "diff 2")
+    }
+  }
+
+  test("filter returns empty set if no elements match the predicate") {
+    new TestSets {
+      val s = filter(s1, x => x > 1)
+      assert(!contains(s, 1), "Filter 1")
+      assert(!contains(s, 2), "Filter 2")
+      assert(!contains(s, 3), "Filter 3")
+    }
+  }
+
+  test("filter returns non empty set if some elements match the predicate") {
+    new TestSets {
+      val s = filter(s3, x => x > 1)
+      assert(!contains(s, 1), "Filter 1")
+      assert(!contains(s, 2), "Filter 2")
+      assert(contains(s, 3), "Filter 3")
     }
   }
 }
