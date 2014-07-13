@@ -147,7 +147,7 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     right.foreach(f)
   }
 
-  override def filterAcc(p: (Tweet) => Boolean, acc: TweetSet): TweetSet = {
+  override def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
     left.filterAcc(p, right.filterAcc(p, if (p(elem)) acc.incl(elem) else acc))
   }
 
