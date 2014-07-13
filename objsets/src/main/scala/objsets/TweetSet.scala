@@ -38,24 +38,20 @@ abstract class TweetSet {
   /**
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
-   *
-   * Question: Can we implment this method here, or should it remain abstract
-   * and be implemented in the subclasses?
    */
-  def filter(p: Tweet => Boolean): TweetSet = ???
+  def filter(p: Tweet => Boolean): TweetSet = {
+    filterAcc(p, new Empty)
+  }
 
   /**
    * This is a helper method for `filter` that propagetes the accumulated tweets.
    */
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
+   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
 
   /**
-   * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
-   *
-   * Question: Should we implment this method here, or should it remain abstract
-   * and be implemented in the subclasses?
+   * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.   *
    */
-   def union(that: TweetSet): TweetSet = ???
+   def union(that: TweetSet): TweetSet
 
   /**
    * Returns the tweet from this set which has the greatest retweet count.
@@ -110,9 +106,6 @@ abstract class TweetSet {
 
 class Empty extends TweetSet {
 
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
-
-
   /**
    * The following methods are already implemented
    */
@@ -124,12 +117,19 @@ class Empty extends TweetSet {
   def remove(tweet: Tweet): TweetSet = this
 
   def foreach(f: Tweet => Unit): Unit = ()
+
+  /**
+   * This is a helper method for `filter` that propagetes the accumulated tweets.
+   */
+  override def filterAcc(p: (Tweet) => Boolean, acc: TweetSet): TweetSet = acc
+
+  /**
+   * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.   *
+   */
+  override def union(that: TweetSet): TweetSet = that
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
-
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
-
 
   /**
    * The following methods are already implemented
@@ -155,6 +155,27 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     f(elem)
     left.foreach(f)
     right.foreach(f)
+  }
+
+  /**
+   * This is a helper method for `filter` that propagetes the accumulated tweets.
+   */
+  override def filterAcc(p: (Tweet) => Boolean, acc: TweetSet): TweetSet = {
+    val result: TweetSet = left.filterAcc(p, right.filterAcc(p, acc))
+
+    if (p(elem)) {
+      return result.incl(elem)
+    }
+
+    result
+  }
+
+  /**
+   * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.   *
+   */
+  override def union(that: TweetSet): TweetSet = {
+    val result = left.union(right.union(that))
+    result.incl(elem)
   }
 }
 
