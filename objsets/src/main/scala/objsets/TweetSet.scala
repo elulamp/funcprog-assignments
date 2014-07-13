@@ -39,9 +39,7 @@ abstract class TweetSet {
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
    */
-  def filter(p: Tweet => Boolean): TweetSet = {
-    filterAcc(p, new Empty)
-  }
+  def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
 
   /**
    * This is a helper method for `filter` that propagetes the accumulated tweets.
@@ -59,22 +57,15 @@ abstract class TweetSet {
    * Calling `mostRetweeted` on an empty set should throw an exception of
    * type `java.util.NoSuchElementException`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
-   * and be implemented in the subclasses?
    */
-  def mostRetweeted: Tweet = ???
-
+  def mostRetweeted: Tweet
+  def mostRetweetedAcc(acc: Tweet): Tweet
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
    * in descending order. In other words, the head of the resulting list should
    * have the highest retweet count.
-   *
-   * Hint: the method `remove` on TweetSet will be very useful.
-   * Question: Should we implment this method here, or should it remain abstract
-   * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = ???
-
+  def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -127,13 +118,15 @@ class Empty extends TweetSet {
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.   *
    */
   override def union(that: TweetSet): TweetSet = that
+
+  override def mostRetweeted: Tweet = throw new NoSuchElementException
+
+  override def mostRetweetedAcc(acc: Tweet): Tweet = acc
+
+  override def descendingByRetweet: TweetList = Nil
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
-
-  /**
-   * The following methods are already implemented
-   */
 
   def contains(x: Tweet): Boolean =
     if (x.text < elem.text) left.contains(x)
@@ -157,25 +150,25 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     right.foreach(f)
   }
 
-  /**
-   * This is a helper method for `filter` that propagetes the accumulated tweets.
-   */
   override def filterAcc(p: (Tweet) => Boolean, acc: TweetSet): TweetSet = {
-    val result: TweetSet = left.filterAcc(p, right.filterAcc(p, acc))
-
-    if (p(elem)) {
-      return result.incl(elem)
-    }
-
-    result
+    left.filterAcc(p, right.filterAcc(p, if (p(elem)) acc.incl(elem) else acc))
   }
 
-  /**
-   * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.   *
-   */
   override def union(that: TweetSet): TweetSet = {
-    val result = left.union(right.union(that))
-    result.incl(elem)
+    left.union(right.union(that.incl(elem)))
+  }
+
+  override def mostRetweeted: Tweet = {
+    mostRetweetedAcc(elem)
+  }
+
+  override def mostRetweetedAcc(acc: Tweet): Tweet = {
+    left.mostRetweetedAcc(right.mostRetweetedAcc(if (elem.retweets > acc.retweets) elem else acc))
+  }
+
+  override def descendingByRetweet: TweetList = {
+    val mostRetweetedTweet = mostRetweeted
+    new Cons(mostRetweetedTweet, remove(mostRetweetedTweet).descendingByRetweet)
   }
 }
 
